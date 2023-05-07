@@ -10,7 +10,10 @@ class PostalCodeRepository(object):
             'SELECT address FROM "postal_code" WHERE code = ?;',
             (code,)
         )
-        address = curs.fetchone()
+        tuple_address = curs.fetchone()
         curs.close()
         conn.close()
+        if tuple_address is None:
+            return None
+        address, = tuple_address
         return address
