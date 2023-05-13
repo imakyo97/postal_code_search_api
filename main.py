@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import jsonify
 from flask import request
 
 from postal_code_db import postal_code_repository
@@ -7,28 +8,25 @@ from postal_code_db import postal_code_repository
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 
-postal_code_repository = postal_code_repository.PostalCodeRepository()
-
-
 @app.route('/')
 def hello_postal_code_search_api():
     return '郵便番号APIです。'
 
 @app.route('/address', methods=['GET'])
 def get_address():
+    repo = postal_code_repository.PostalCodeRepository()
     code = request.args.get('code')
-    if code is None:
-        return {
-            "error": "パラメータが不正"
-        }, 400
-    address = postal_code_repository.fetch_address(code)
-    if address is None:
-        return {
+    address = repo.fetch_address(code)
+    if address:
+        json = {
+            "address": address
+        }
+        return jsonify(json)
+    else:
+        json = {
             "error": "該当する住所がありませんでした"
-        }, 400
-    return {
-        "address": address,
-    }, 200
+        }
+        return jsonify(json), 404
 
 def main():
     app.debug = True
